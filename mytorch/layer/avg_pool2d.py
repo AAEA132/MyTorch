@@ -14,7 +14,20 @@ class AvgPool2d(Layer):
 
     def forward(self, x: Tensor) -> Tensor:
         "TODO: implement forward pass"
-        return ...
+        batch_size, channels, in_height, in_width = x.data.shape
+        
+        out_height = (in_height - self.kernel_size[0] + 2 * self.padding[0]) // self.stride[0] + 1
+        out_width = (in_width - self.kernel_size[1] + 2 * self.padding[1]) // self.stride[1] + 1
+
+        output = np.zeros((batch_size, channels, out_height, out_width))
+
+        for b in range(batch_size):
+            for c in range(channels):
+                for h in range(0, in_height - self.kernel_size[0] + 1, self.stride[0]):
+                    for w in range(0, in_width - self.kernel_size[1] + 1, self.stride[1]):
+                        output[b, c, h//self.stride[0], w//self.stride[1]] = np.mean(x.data[b, c, h:h+self.kernel_size[0], w:w+self.kernel_size[1]])
+
+        return Tensor(output)
     
     def __str__(self) -> str:
         return "avg pool 2d - kernel: {}, stride: {}, padding: {}".format(self.kernel_size, self.stride, self.padding)
